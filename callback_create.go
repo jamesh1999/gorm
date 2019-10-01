@@ -63,7 +63,7 @@ func createCallback(scope *Scope) {
 					if field.IsBlank && field.HasDefaultValue {
 						blankColumnsWithDefaultValue = append(blankColumnsWithDefaultValue, scope.Quote(field.DBName))
 						scope.InstanceSet("gorm:blank_columns_with_default_value", blankColumnsWithDefaultValue)
-					} else if !field.IsPrimaryKey || !field.IsBlank {
+					} else if !field.IsPrimaryKey && !field.IsBlank {
 						columns = append(columns, scope.Quote(field.DBName))
 						placeholders = append(placeholders, scope.AddToVars(field.Field.Interface()))
 					}
@@ -113,7 +113,7 @@ func createCallback(scope *Scope) {
 			))
 		} else {
 			scope.Raw(fmt.Sprintf(
-				"INSERT %v INTO %v (%v) VALUES (%v)%v%v",
+				"INSERT %v INTO %v (%v) OUTPUT INSERTED.id VALUES (%v)%v%v",
 				addExtraSpaceIfExist(insertModifier),
 				scope.QuotedTableName(),
 				strings.Join(columns, ","),
@@ -124,16 +124,16 @@ func createCallback(scope *Scope) {
 		}
 
 		// execute create sql
-		if lastInsertIDReturningSuffix == "" || primaryField == nil {
+		if false {//lastInsertIDReturningSuffix == "" || primaryField == nil {
 			if result, err := scope.SQLDB().Exec(scope.SQL, scope.SQLVars...); scope.Err(err) == nil {
 				// set rows affected count
 				scope.db.RowsAffected, _ = result.RowsAffected()
 
 				// set primary value to primary field
 				if primaryField != nil && primaryField.IsBlank {
-					if primaryValue, err := result.LastInsertId(); scope.Err(err) == nil {
-						scope.Err(primaryField.Set(primaryValue))
-					}
+					//if primaryValue, err := result.LastInsertId(); scope.Err(err) == nil {
+					//	scope.Err(primaryField.Set(primaryValue))
+					//}
 				}
 			}
 		} else {

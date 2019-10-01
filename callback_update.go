@@ -98,9 +98,10 @@ func updateCallback(scope *Scope) {
 
 		if len(sqls) > 0 {
 			scope.Raw(fmt.Sprintf(
-				"UPDATE %v SET %v%v%v",
+				"UPDATE %v SET %v FROM %v%v%v",
 				scope.QuotedTableName(),
 				strings.Join(sqls, ", "),
+				scope.QuotedTableName(),
 				addExtraSpaceIfExist(scope.CombinedConditionSql()),
 				addExtraSpaceIfExist(extraOption),
 			)).Exec()
